@@ -1,7 +1,7 @@
 ---
 
 - name: creating kubernetes directories
-  file: path={{ item }} state=directory
+  file: path={{ item }} state=directory recurse=yes force=yes
   with_items:
     - "{{ kube_manifest_dir }}"
     - "{{ kube_config_dir }}"
