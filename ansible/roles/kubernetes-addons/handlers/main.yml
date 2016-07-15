@@ -1,0 +1,28 @@
+---
+
+- name: kube-apiserver_restart
+  command: /bin/true
+  notify:
+    - kube-apiserver_stop
+    - kube-apiserver_start
+
+- name: kube-apiserver_stop
+  service: name=kube-apiserver state=stopped
+
+- name: kube-apiserver_start
+  service: name=kube-apiserver state=started
+
+
+- name: kube-addons_restart
+  command: /bin/true
+  notify:
+    - kube-addons_stop
+    - kube-addons_start
+
+- name: kube-addons_stop
+  service: name=kube-addons state=stopped
+
+- name: kube-addons_start
+  service: name=kube-addons state=started
+
+# vi:syntax=yaml

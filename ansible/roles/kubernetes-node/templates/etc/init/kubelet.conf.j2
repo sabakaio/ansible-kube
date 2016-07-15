@@ -1,0 +1,24 @@
+description "Kubelet service"
+
+respawn
+
+# start in conjunction with flanneld
+start on started flanneld
+stop on stopping flanneld
+
+pre-start script
+	KUBELET={{ bin_directory }}/$UPSTART_JOB
+
+  test -f /etc/default/$UPSTART_JOB && . /etc/default/$UPSTART_JOB
+  test -x ${KUBE_PROXY}
+end script
+
+script
+	# modify these in /etc/default/$UPSTART_JOB (/etc/default/docker)
+	KUBELET={{ bin_directory }}/$UPSTART_JOB
+	KUBELET_OPTS=""
+
+  test -f /etc/default/$UPSTART_JOB && . /etc/default/$UPSTART_JOB
+	exec "$KUBELET" $KUBELET_OPTS
+end script
+

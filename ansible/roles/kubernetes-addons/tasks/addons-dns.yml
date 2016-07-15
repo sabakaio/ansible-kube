@@ -1,0 +1,16 @@
+---
+
+- name: DNS | creating {{ kube_addons_dir }}/dns directory
+  file: path={{ kube_addons_dir }}/dns state=directory
+
+- name: DNS | installing dns configuration files
+  template: src=etc/kubernetes/dns/{{ item }}.j2 dest={{ kube_addons_dir }}/dns/{{ item }}
+  args:
+    mode: 0644
+    owner: root
+    group: root
+  with_items:
+    - skydns-rc.yaml
+    - skydns-svc.yaml
+
+# vi:syntax=yaml

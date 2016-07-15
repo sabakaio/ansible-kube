@@ -1,0 +1,30 @@
+---
+
+- name: checking addons directory existance
+  file: path={{ item }} state=directory
+  with_items:
+    - "{{ kube_addons_dir }}"
+    - "{{ kube_addons_tmp_dir }}"
+
+- include: addons-install.yml
+- include: addons-dns.yml
+- include: addons-monitoring.yml
+- include: addons-logging.yml
+- include: addons-ui.yml
+- include: addons-dash.yml
+
+- include: addons-tokens.yml
+- include: addons-ssl.yml
+
+- name: installing kube-addons upstart configuration
+  template: src=etc/init/kube-addons.conf.j2 dest=/etc/init/kube-addons.conf
+
+
+- name: installing kube-addons script from Kubernetes
+  copy: src=opt/kubernetes/scripts/kube-addons.sh dest={{ kube_script_dir }}/kube-addons.sh mode=0744
+
+- name: installing kube-addon-update script from Kubernetes
+  copy: src=opt/kubernetes/scripts/kube-addon-update.sh dest={{ kube_script_dir }}/kube-addon-update.sh mode=0744
+
+
+# vi:syntax=yaml

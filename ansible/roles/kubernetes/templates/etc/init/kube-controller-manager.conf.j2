@@ -1,0 +1,23 @@
+description "Kube-Controller-Manager service"
+
+respawn
+
+# start in conjunction with etcd
+start on started etcd
+stop on stopping etcd
+
+pre-start script
+	KUBE_CONTROLLER_MANAGER={{ kube_bin_dir }}/$UPSTART_JOB
+
+  test -f /etc/default/$UPSTART_JOB && . /etc/default/$UPSTART_JOB
+  test -x $KUBE_CONTROLLER_MANAGER
+end script
+
+script
+	# modify these in /etc/default/$UPSTART_JOB (/etc/default/docker)
+	KUBE_CONTROLLER_MANAGER={{ kube_bin_dir }}/$UPSTART_JOB
+	KUBE_CONTROLLER_MANAGER_OPTS=""
+
+  test -f /etc/default/$UPSTART_JOB && . /etc/default/$UPSTART_JOB
+	exec "$KUBE_CONTROLLER_MANAGER" $KUBE_CONTROLLER_MANAGER_OPTS
+end script

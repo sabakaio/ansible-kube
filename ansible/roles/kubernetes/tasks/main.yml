@@ -1,0 +1,8 @@
+---
+
+- include: kubernetes-basic.yml
+- include: kubernetes-tokens.yml
+- include: kubernetes-config.yml
+- include: kubernetes-service.yml
+
+# vi:syntax=yaml

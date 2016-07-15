@@ -1,0 +1,9 @@
+---
+
+- name: starting node services
+  service: name={{ item }} enabled=yes state=started
+  with_items:
+    - kubelet
+    - kube-proxy
+
+# vi:syntax=yaml

@@ -1,0 +1,64 @@
+
+[ ca ]
+default_ca	                = CA_default
+
+[ CA_default ]
+dir	                        = .
+new_certs_dir	              = $dir
+serial	                    = {{ openssl_ca_serial }}
+database	                  = {{ openssl_ca_database }}
+
+default_days	              = 3650
+default_crl_days	          = 30
+default_md	                = default
+preserve	                  = no
+
+unique_subject	            = no #FIX for "TXT_DB error number 2"
+
+# A few difference way of specifying how similar the request should look
+# For type CA, the listed attributes must be the same, and the optional
+# and supplied fields are just that :-)
+policy	                    = policy_anything
+
+[ policy_anything ]
+countryName	                = optional
+stateOrProvinceName	        = optional
+localityName	              = optional
+organizationName	          = optional
+organizationalUnitName	    = optional
+commonName	                = supplied
+name	                      = optional
+emailAddress	              = optional
+
+[ req ]
+default_bits                = 2048
+default_keyfile             = server.key
+distinguished_name          = req_distinguished_name
+req_extensions              = v3_req
+ 
+[ req_distinguished_name ]
+countryName                 = Country Name (2 letter code)
+countryName_default         = ES
+stateOrProvinceName         = State or Province Name (full name)
+stateOrProvinceName_default = Tallin
+localityName                = Locality Name (eg, city)
+localityName_default        = Sabaka
+organizationName            = Organization Name (eg, company)
+organizationName_default    = Kubernetes
+commonName                  = Common Name (eg, YOUR name)
+commonName_default          = {{ groups['masters'][0] }}
+commonName_max              = 64
+ 
+[ v3_req ]
+basicConstraints            = CA:FALSE
+keyUsage                    = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName              = @alt_names
+ 
+[alt_names]
+DNS.1 = kubernetes.default
+{% set count = 1 %}
+{% for ip in groups['masters'] %}
+IP.{{ count }} = {{ ip }}
+{% set count = count + 1 %}
+{% endfor %}
+

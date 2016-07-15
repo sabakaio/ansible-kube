@@ -1,0 +1,8 @@
+---
+
+- include: node-config.yml
+- include: node-ssl.yml
+- include: node-fluentd.yml
+- include: node-service.yml
+
+# vi:syntax=yaml

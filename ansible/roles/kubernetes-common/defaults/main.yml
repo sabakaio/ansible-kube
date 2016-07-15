@@ -1,0 +1,18 @@
+---
+
+# Version of Kubernetes binaries
+kube_version: 1.3.0
+
+# The URL to download Kubernetes binaries from.
+kube_download_url_base: https://storage.googleapis.com/kubernetes-release/release/v{{ kube_version }}/bin/linux/amd64
+
+# List of Kubernetes binaries to download and install.
+kube_binaries:
+  - kube-apiserver
+  - kube-controller-manager
+  - kube-proxy
+  - kube-scheduler
+  - kubectl
+  - kubelet
+
+# vi:syntax=yaml

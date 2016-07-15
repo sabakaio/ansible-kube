@@ -1,0 +1,41 @@
+---
+
+- name: kube-apiserver_restart
+  command: /bin/true
+  notify:
+    - kube-apiserver_stop
+    - kube-apiserver_start
+
+- name: kube-apiserver_stop
+  service: name=kube-apiserver state=stopped
+
+- name: kube-apiserver_start
+  service: name=kube-apiserver state=started
+
+
+- name: kube-controller-manager_restart
+  command: /bin/true
+  notify:
+    - kube-controller-manager_stop
+    - kube-controller-manager_start
+
+- name: kube-controller-manager_stop
+  service: name=kube-controller-manager state=stopped
+
+- name: kube-controller-manager_start
+  service: name=kube-controller-manager state=started
+
+
+- name: kube-scheduler_restart
+  command: /bin/true
+  notify:
+    - kube-scheduler_stop
+    - kube-scheduler_start
+
+- name: kube-scheduler_stop
+  service: name=kube-scheduler state=stopped
+
+- name: kube-scheduler_start
+  service: name=kube-scheduler state=started
+
+# vi:syntax=yaml

@@ -1,0 +1,191 @@
+---
+
+- name: setting needed variables
+  set_fact:
+    openssl_ca_database: ca_database.txt
+    openssl_ca_serial: serial
+
+- name: checking configurations files existance
+  file: path={{ item }} state=touch
+  with_items:
+    - "{{  kube_ssl_dir }}/{{ openssl_ca_database }}"
+
+- name: checking CA serial existance
+  copy: dest={{ kube_ssl_dir }}/{{ openssl_ca_serial }} content=01
+
+
+- name: creating ssl template
+  template: src=opt/kubernetes/ssl/openssl.cnf.j2 dest={{ kube_ssl_dir }}/openssl.cnf
+
+
+- name: generating CA key
+  command: >
+    openssl genrsa -out rootca.key 4096
+  args:
+    chdir: "{{ kube_ssl_dir }}"
+    creates: "{{ kube_ssl_dir }}/rootca.key"
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: generating CA certificate
+  command: >
+    openssl req -batch 
+      -sha256 -new -x509 
+      -days 3650 
+      -out rootca.crt
+      -key rootca.key 
+      -config openssl.cnf
+  args:
+    chdir: "{{ kube_ssl_dir }}"
+    creates: "{{ kube_ssl_dir }}/rootca.crt"
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: generating master private key
+  command: >
+    openssl genrsa -out server.key 2048
+  args:
+    chdir: "{{ kube_ssl_dir }}"
+    creates: "{{ kube_ssl_dir }}/server.key"
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: generating master sign request
+  command: >
+    openssl req -batch -new 
+      -out server.csr 
+      -key server.key 
+      -config openssl.cnf
+  args:
+    chdir: "{{ kube_ssl_dir }}"
+    creates: "{{ kube_ssl_dir }}/server.csr"
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: signing master certificate
+  command: >
+    openssl ca
+      -batch
+      -days 3650 
+      -extensions server_cert
+      -in server.csr 
+      -out server.crt 
+      -cert rootca.crt
+      -keyfile rootca.key 
+      -extensions v3_req
+      -config openssl.cnf
+  args:
+    chdir: "{{ kube_ssl_dir }}"
+    creates: "{{ kube_ssl_dir }}/server.crt"
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+
+
+- name: generating kubelet and kubecfg private key
+  command: >
+    openssl genrsa -out {{ item }}.key 2048
+  args:
+    chdir: "{{ kube_ssl_dir }}"
+    creates: "{{ kube_ssl_dir }}/{{ item }}.key"
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+  with_items:
+    - kubelet
+    - kubecfg
+
+- name: generating kubelet and kubecfg sign request
+  command: >
+    openssl req -batch -new 
+      -out {{ item }}.csr 
+      -key {{ item }}.key 
+      -config openssl.cnf
+  args:
+    chdir: "{{ kube_ssl_dir }}"
+    creates: "{{ kube_ssl_dir }}/{{ item }}.csr"
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+  with_items:
+    - kubelet
+    - kubecfg
+
+- name: signing kubelet and kubecfg certificate
+  command: >
+    openssl ca
+      -batch
+      -days 3650 
+      -extensions server_cert
+      -in {{ item }}.csr 
+      -out {{ item }}.crt 
+      -cert rootca.crt
+      -keyfile rootca.key 
+      -extensions v3_req
+      -config openssl.cnf
+  args:
+    chdir: "{{ kube_ssl_dir }}"
+    creates: "{{ kube_ssl_dir }}/{{ item }}.crt"
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+  with_items:
+    - kubelet
+    - kubecfg
+
+
+- name: reading content of CA cert
+  slurp: src={{ kube_ssl_dir }}/rootca.crt
+  register: rootca_crt
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: reading content of master cert
+  slurp: src={{ kube_ssl_dir }}/server.crt
+  register: server_crt
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: reading content of master key
+  slurp: src={{ kube_ssl_dir }}/server.key
+  register: server_key
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+
+
+- name: reading content of kubecfg key
+  slurp: src={{ kube_ssl_dir }}/kubecfg.key
+  register: kubecfg_key
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: reading content of kubecfg crt
+  slurp: src={{ kube_ssl_dir }}/kubecfg.crt
+  register: kubecfg_crt
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+
+
+- set_fact:
+    kube_rootca_crt: "{{ rootca_crt.content|b64decode }}"
+    kube_server_crt: "{{ server_crt.content|b64decode }}"
+    kube_server_key: "{{ server_key.content|b64decode }}"
+    kube_kubecfg_key: "{{ kubecfg_key.content|b64decode }}"
+    kube_kubecfg_crt: "{{ kubecfg_crt.content|b64decode }}"
+
+
+- name: copying key/certificate to kubernetes config directory
+  copy: content="{{ kube_rootca_crt }}" dest={{ kube_cert_dir }}/ca.crt
+
+- name: copying key/certificate to kubernetes config directory
+  copy: content="{{ kube_server_crt }}" dest={{ kube_cert_dir }}/server.crt
+
+- name: copying key/certificate to kubernetes config directory
+  copy: content="{{ kube_server_key }}" dest={{ kube_cert_dir }}/server.key
+
+
+- name: installing custom CA to the system
+  copy: content="{{ kube_rootca_crt }}" dest=/usr/local/share/ca-certificates/kubernetes.crt
+  register: result
+
+- name: updating system CA
+  command: update-ca-certificates
+  when: result.changed
+
+# vi:syntax=yaml

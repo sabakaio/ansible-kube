@@ -1,0 +1,15 @@
+---
+
+- name: import gpg key
+  apt_key: keyserver=hkp://p80.pool.sks-keyservers.net:80 id=58118E89F3A912897C070ADBF76221572C52609D
+  sudo: yes
+
+- name: install docker official repository
+  template: src=etc/apt/sources.list.d/docker.list.j2 dest=/etc/apt/sources.list.d/docker.list
+  sudo: yes
+
+- name: install docker-engine
+  apt: name=docker-engine={{ docker_version }}~{{ ansible_distribution_release }} state=present update_cache=yes
+  sudo: yes
+
+# vi:syntax=yaml

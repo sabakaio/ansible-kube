@@ -1,0 +1,10 @@
+---
+
+- name: checking kernel version
+  set_fact:
+    kernel_not_valid: "{{ ansible_kernel|version_compare(kernel_required, '<=') }}"
+
+- include: kernel/main.yml
+  when: kernel_not_valid
+
+# vi:syntax=yaml

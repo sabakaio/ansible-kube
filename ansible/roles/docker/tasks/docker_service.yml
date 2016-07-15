@@ -1,0 +1,7 @@
+---
+
+- name: starting docker daemon
+  service: name=docker enabled=yes state=started
+  sudo: yes
+
+# vi:syntax=yaml

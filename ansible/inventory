@@ -1,0 +1,14 @@
+
+[masters]
+10.63.21.35
+
+[etcd:children]
+masters
+nodes
+
+[nodes]
+10.63.23.65
+10.63.22.120
+
+[nodes:children]
+

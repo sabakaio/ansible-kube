@@ -1,0 +1,29 @@
+---
+
+- name: kube-proxy_restart
+  command: /bin/true
+  notify:
+    - kube-proxy_stop
+    - kube-proxy_start
+
+- name: kube-proxy_stop
+  service: name=kube-proxy state=stopped
+
+- name: kube-proxy_start
+  service: name=kube-proxy state=started
+
+
+- name: kubelet_restart
+  command: /bin/true
+  notify:
+    - kubelet_stop
+    - kubelet_start
+
+- name: kubelet_stop
+  service: name=kubelet state=stopped
+
+- name: kubelet_start
+  service: name=kubelet state=started
+
+
+# vi:syntax=yaml

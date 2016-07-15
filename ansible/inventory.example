@@ -1,0 +1,13 @@
+
+[masters]
+k8s-master.example.com
+
+[etcd:children]
+masters
+
+[nodes]
+k8s-nodes.example.com
+
+[nodes:children]
+masters
+

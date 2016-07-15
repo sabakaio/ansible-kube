@@ -1,0 +1,81 @@
+---
+
+ansible_ssh_user: ubuntu
+temporary_directory: /var/tmp/kubernetes
+destination_directory: /opt
+networking: flannel
+
+reboot_on_kernel_update: true
+
+# Editting this value will almost surely break something. Don't
+# change it. Things like the systemd scripts are hard coded to
+# look in here. Don't do it.
+kube_config_dir: /etc/kubernetes
+kube_destination: "{{ destination_directory }}/kubernetes"
+kube_token_dir: "{{ kube_config_dir }}/tokens"
+kube_basic_file: "{{ kube_config_dir }}/basic"
+kube_cert_dir: "{{ kube_config_dir }}/ssl"
+kube_ssl_dir: "{{ kube_destination }}/ssl"
+kube_bin_dir: "{{ kube_destination }}/bin"
+
+# The port that the Kubernetes apiserver component listens on.
+kube_master_api_port: 443
+kube_master_api_scheme: https
+
+# This is where you can drop yaml/json files and the kubelet will run those
+# pods on startup
+kube_manifest_dir: "{{ kube_config_dir }}/manifests"
+
+# This directory is where all the additional scripts go
+# that Kubernetes normally puts in /srv/kubernetes.
+# This puts them in a sane location
+kube_script_dir: "{{ kube_destination }}/scripts"
+
+# will be used as the Internal dns domain name if DNS is enabled. Services
+# will be discoverable under <service-name>.<namespace>.svc.<domainname>, e.g.
+# myservice.default.svc.cluster.local
+cluster_name: cluster.local
+
+# Kubernetes internal network for services.
+# Kubernetes services will get fake IP addresses from this range.
+# This range must not conflict with anything in your infrastructure. These
+# addresses do not need to be routable and must just be an unused block of space.
+kube_service_addresses: 10.254.0.0/16
+
+# Turn this varable to 'false' to disable whole DNS configuration.
+dns_setup: true
+
+# Internal DNS domain name.
+# This domain must not be used in your network. Services will be discoverable
+# under <service-name>.<namespace>.<domainname>, e.g.
+# myservice.default.svc.cluster.local
+dns_domain: "{{ cluster_name }}"
+
+# IP address of the DNS server.
+# Kubernetes will create a pod with several containers, serving as the DNS
+# server and expose it under this IP address. The IP address must be from
+# the range specified as kube_service_addresses. This magic will actually
+# pick the 10th ip address in the kube_service_addresses range and use that.
+dns_server: "{{ kube_service_addresses|ipaddr('net')|ipaddr(10)|ipaddr('address') }}"
+
+# Flannel internal network (optional). When flannel is used, it will assign IP
+# addresses from this range to individual pods.
+# This network must be unused in your network infrastructure!
+flannel_subnet: 172.16.0.0
+
+# Flannel internal network total size (optional). This is the prefix of the
+# entire flannel overlay network.  So the entirety of 172.16.0.0/12 must be
+# unused in your environment.
+flannel_prefix: 12
+
+# Flannel internal network (optional). This is the size allocation that flannel
+# will give to each node on your network.  With these defaults you should have
+# room for 4096 nodes with 254 pods per node.
+flannel_host_prefix: 24
+
+bin_directory: /usr/local/bin
+
+# How many replicas in the Replication Controller
+dns_replicas: 1
+
+# vi:syntax=yaml

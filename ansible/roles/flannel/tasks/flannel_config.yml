@@ -1,0 +1,30 @@
+---
+
+- name: setting variables for etcdctl command
+  set_fact:
+    _etcd_peers: >
+      {% for host in groups['etcd'] %}http://{{ host }}:{{ etcd_client_port }}{% if not loop.last %},{% endif %}{% endfor %}
+    _flannel_config_file: /tmp/flannel.json
+    _etcd_config_path: /{{ cluster_name }}/network/config
+  run_once: true
+  delegate_to: "{{ groups['etcd'][0] }}"
+
+- name: creating flannel temporary config file for etcd
+  template: src=tmp/flannel.json.j2 dest={{ _flannel_config_file }}
+  run_once: true
+  delegate_to: "{{ groups['etcd'][0] }}"
+
+- name: loading flannel config file to etcd
+  shell: etcdctl --no-sync --peers={{ _etcd_peers }} set {{ _etcd_config_path }} < {{ _flannel_config_file }}
+  args:
+    executable: /bin/bash
+  run_once: true
+  delegate_to: "{{ groups['etcd'][0] }}"
+
+- name: removing flannel temporary config file
+  file: path=/tmp/flannel.json state=absent
+  run_once: true
+  delegate_to: "{{ groups['etcd'][0] }}"
+
+
+# vi:syntax=yaml

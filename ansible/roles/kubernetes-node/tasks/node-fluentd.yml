@@ -1,0 +1,6 @@
+---
+
+- name: installing fluentd pod
+  template: src=etc/kubernetes/manifests/fluentd-es.yml.j2 dest={{ kube_manifest_dir }}/fluentd-es.yml
+
+# vi:syntax=yaml

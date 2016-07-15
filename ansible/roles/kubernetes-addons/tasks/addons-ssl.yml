@@ -1,0 +1,12 @@
+---
+
+- name: reading content of CA cert
+  slurp: src={{ kube_ssl_dir }}/rootca.crt
+  register: rootca_crt
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- set_fact:
+    kube_rootca_crt: "{{ rootca_crt.content|b64decode }}"
+
+# vi:syntax=yaml

@@ -1,0 +1,27 @@
+---
+
+- name: reading content of kubelet key
+  slurp: src={{ kube_ssl_dir }}/kubelet.key
+  register: kubelet_key
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: reading content of kubelet crt
+  slurp: src={{ kube_ssl_dir }}/kubelet.crt
+  register: kubelet_crt
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+
+
+- set_fact:
+    kube_kubelet_key: "{{ kubelet_key.content|b64decode }}"
+    kube_kubelet_crt: "{{ kubelet_crt.content|b64decode }}"
+
+
+- name: copying key/certificate to kubernetes config directory
+  copy: content="{{ kube_kubelet_crt }}" dest={{ kube_cert_dir }}/kubelet.crt
+
+- name: copying key/certificate to kubernetes config directory
+  copy: content="{{ kube_kubelet_key }}" dest={{ kube_cert_dir }}/kubelet.key
+
+# vi:syntax=yaml

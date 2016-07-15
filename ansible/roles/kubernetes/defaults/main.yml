@@ -1,0 +1,11 @@
+---
+
+kube_master_insecure_port: 8080
+kube_apiserver_bind_address: "0.0.0.0"
+
+admission_controllers: NamespaceLifecycle,NamespaceExists,LimitRanger,ServiceAccount,ResourceQuota
+
+# See kube documentation for apiserver runtime config options.  Example below enables HPA, deployments features.
+# apiserver_extra_args: "--runtime-config=extensions/v1beta1/deployments=true"
+
+# vi:syntax=yaml

@@ -1,0 +1,63 @@
+---
+
+- name: checking the kubelet working directory existance
+  file: path={{ kubelet_working_dir }} state=directory
+
+
+- name: installing upstart configuration
+  template: src=etc/init/{{ item }}.j2 dest=/etc/init/{{ item }}
+  with_items:
+    - kube-proxy.conf
+    - kubelet.conf
+
+- name: installing service default configs
+  template: src=etc/default/{{ item }}.j2 dest=/etc/default/{{ item }}
+  register: service_defaults
+  with_items:
+    - kube-proxy
+    - kubelet
+
+
+- name: reading node token
+  slurp: src={{ kube_token_dir }}/{{ item }}-{{ inventory_hostname }}.token
+  register: node_tokens
+  delegate_to: "{{ groups['masters'][0] }}"
+  run_once: true
+  with_items:
+    - system:kubelet
+    - system:proxy
+
+- name: import tokens as variables
+  set_fact:
+    kubelet_token: "{{ node_tokens.results[0].content|b64decode }}"
+    proxy_token: "{{ node_tokens.results[1].content|b64decode }}"
+
+
+- name: writing the kubecfg (auth) file for kubelet
+  template: src=etc/kubernetes/kubelet.kubeconfig.j2 dest={{ kube_config_dir }}/kubelet.kubeconfig
+  notify:
+    - kubelet_restart
+
+- name: writing the config files for kubelet
+  template: src=etc/kubernetes/kubelet.j2 dest={{ kube_config_dir }}/kubelet
+  notify:
+    - kubelet_restart
+
+
+- name: writing the kubecfg (auth) file for kube-proxy
+  template: src=etc/kubernetes/proxy.kubeconfig.j2 dest={{ kube_config_dir }}/proxy.kubeconfig
+  notify:
+    - kube-proxy_restart
+
+- name: writing the config files for proxy
+  template: src=etc/kubernetes/proxy.j2 dest={{ kube_config_dir }}/proxy
+  notify:
+    - kube-proxy_restart
+
+
+- name: restarting services
+  service: name={{ item.item }} state=restarted
+  when: item.changed
+  with_items: service_defaults.results
+
+# vi:syntax=yaml

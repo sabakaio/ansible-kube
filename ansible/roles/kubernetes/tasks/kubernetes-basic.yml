@@ -1,0 +1,8 @@
+---
+
+- name: installing basic authorization tokens
+  template: src=etc/kubernetes/basic.j2 dest={{ kube_basic_file }}
+  notify:
+    - kube-apiserver_restart
+
+# vi:syntax=yaml

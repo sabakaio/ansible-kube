@@ -1,0 +1,50 @@
+---
+
+- hosts: all
+  sudo: yes
+  roles:
+    - common
+
+- hosts: etcd
+  sudo: yes
+  roles:
+    - etcd
+
+- hosts: 
+    - masters
+    - nodes
+  sudo: yes
+  roles:
+    - flannel
+
+- hosts: all
+  sudo: yes
+  roles:
+    - docker
+
+- hosts: 
+    - masters
+    - nodes
+  sudo: yes
+  roles:
+    - kubernetes-common
+
+- hosts: 
+    - masters
+  sudo: yes
+  roles:
+    - kubernetes
+
+- hosts:
+    - nodes
+  sudo: yes
+  roles:
+    - kubernetes-node
+
+- hosts:
+    - masters
+  sudo: yes
+  roles:
+    - kubernetes-addons
+
+# vi:syntax=yaml

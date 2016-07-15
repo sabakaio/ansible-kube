@@ -1,0 +1,46 @@
+---
+
+- name: checking temprorary directory
+  file: path={{ temporary_directory }} state=directory
+
+- name: downloading flannel sources
+  get_url: url={{ flannel_download_url }} dest={{ temporary_directory }}
+
+- name: checking destination directory
+  file: path={{ item }} state=directory
+  with_items:
+    - "{{ flannel_destination }}"
+
+- name: unpacking sources
+  command: >
+    tar --strip-components 1 -xzvf {{ temporary_directory }}/flannel-{{ flannel_version }}-linux-amd64.tar.gz -C {{ flannel_destination }}
+
+- name: creating symlinks
+  file: 
+  args:
+    src: "{{ flannel_destination }}/{{ item }}"
+    dest: "{{ bin_directory }}/{{ item }}"
+    state: link
+  with_items:
+    - flanneld
+    - mk-docker-opts.sh
+
+- name: checking config directory existance
+  file: path={{ flannel_config_dir }} state=directory
+
+- name: installing flannel config file
+  template: src=etc/flannel/flanneld.j2 dest={{ flannel_config_dir }}/flanneld
+
+- name: installing flannel upstart configuration file
+  template: src=etc/init/flanneld.conf.j2 dest=/etc/init/flanneld.conf
+  register: flanneld_conf_upstart
+
+- name: enabling flanneld service
+  service: name=flanneld enabled=yes
+
+- name: starting flanneld service
+  service: name=flanneld state=started
+  notify:
+    - docker_restart
+
+# vi:syntax=yaml

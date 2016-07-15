@@ -1,0 +1,51 @@
+---
+
+- name: checking temprorary directory
+  file: path={{ temporary_directory }} state=directory
+
+- name: downloading etcd sources
+  get_url: url={{ etcd_download_url }} dest={{ temporary_directory }}
+
+
+- name: checking destination directory
+  file: path={{ item }} state=directory
+  with_items:
+    - "{{ etcd_destination }}"
+    - "{{ etcd_config_dir }}"
+
+- name: unpacking sources
+  command: >
+    tar --strip-components 1 -xzvf {{ temporary_directory }}/etcd-v{{ etcd_version }}-linux-amd64.tar.gz -C {{ etcd_destination }}
+
+- name: creating symlinks
+  file: 
+  args:
+    src: "{{ etcd_destination }}/{{ item }}"
+    dest: "{{ bin_directory }}/{{ item }}"
+    state: link
+  with_items:
+    - etcd
+    - etcdctl
+
+
+- name: installing etcd configuration file
+  template: src=etc/etcd/etcd.conf.j2 dest=/etc/etcd/etcd.conf
+  register: etcd_conf_j2
+
+- name: installing etcd upstart configuration file
+  copy: src=etc/init/etcd.conf dest=/etc/init/etcd.conf
+  register: etcd_conf_upstart
+
+
+- name: enabling etcd service
+  service: name=etcd enabled=yes
+  when: etcd_enabled
+
+- name: starting etcd service
+  service: name=etcd state=started
+
+- name: restarting etcd service
+  service: name=etcd state=restarted
+  when: etcd_conf_j2.changed or etcd_conf_upstart.changed
+
+# vi:syntax=yaml

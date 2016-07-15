@@ -1,0 +1,7 @@
+---
+
+- include: common-config.yml
+- include: common-install.yml
+- include: common-ssl.yml
+
+# vi:syntax=yaml

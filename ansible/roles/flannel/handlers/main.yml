@@ -1,0 +1,23 @@
+---
+
+- name: docker_restart
+  command: /bin/true
+  notify:
+    - docker_stop_service
+    - docker_delete_docker0
+    - docker_start_service
+
+- name: docker_stop_service
+  service: name=docker state=stopped
+  register: docker_stop_service
+  when: '"docker0" in ansible_interfaces'
+
+- name: docker_delete_docker0
+  command: ip link delete docker0
+  when: '"docker0" in ansible_interfaces'
+
+- name: docker_start_service
+  service: name=docker state=started
+  when: docker_stop_service.changed
+
+# vi:syntax=yaml

@@ -1,0 +1,8 @@
+---
+
+- name: creating docker daemon config
+  template: src=etc/default/docker.j2 dest=/etc/default/docker
+  notify:
+    - docker_restart
+
+# vi:syntax=yaml

@@ -1,0 +1,29 @@
+---
+
+- name: generating tokens for addons
+  shell: >
+    grep {{ item }} {{ kube_token_file }} ||
+    {{ kube_script_dir }}/generate_token.sh
+  register: addons_tokens
+  with_items:
+    - "system:dns"
+    - "system:monitoring"
+    - "system:logging"
+
+- name: creating token file for addon
+  copy: content={{ item.stdout }} dest={{ kube_token_dir }}/{{ item.item }}.token
+  when: item.stdout|length == 32
+  with_items: addons_tokens.results
+
+- name: inserting token to known_tokens file
+  lineinfile: 
+    dest: "{{ kube_token_file }}"
+    line: "{{ item.stdout }},{{ item.item }},{{ item.item }}"
+    regexp: "{{ item.stdout }},{{ item.item }},{{ item.item }}"
+  when: item.stdout|length == 32
+  with_items: addons_tokens.results
+  notify:
+    - kube-apiserver_restart
+    - kube-addons_restart
+
+# vi:syntax=yaml

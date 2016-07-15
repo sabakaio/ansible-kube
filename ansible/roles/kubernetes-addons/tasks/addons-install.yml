@@ -1,0 +1,12 @@
+---
+
+- name: installing pyyaml
+  apt: name=python-yaml state=latest
+
+- name: installing config for system services namespace
+  copy:
+    src=etc/kubernetes/addons/namespace.yaml
+    dest="{{ kube_config_dir }}/addons/namespace.yaml"
+
+
+# vi:syntax=yaml

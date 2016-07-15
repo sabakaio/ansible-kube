@@ -1,0 +1,65 @@
+---
+
+- set_fact:
+    kube_token_file: "{{ kube_token_dir }}/known_tokens.csv"
+
+- name: checking token directory
+  file: path={{ kube_token_dir }} state=directory
+
+- name: installing token generator
+  copy: src=opt/kubernetes/scripts/generate_token.sh dest={{ kube_script_dir }} mode=0744
+
+- name: checking known_tokens file existance
+  file: path={{ kube_token_file }} state=touch
+
+
+- name: generating tokens for master components
+  shell: >
+    grep {{ item[0] }}-{{ item[1] }} {{ kube_token_file }} ||
+    {{ kube_script_dir }}/generate_token.sh
+  register: master_tokens
+  with_nested:
+    - [ "system:controller_manager", "system:scheduler", "system:kubectl" ]
+    - "{{ groups['masters'] }}"
+
+- name: creating token file for master component
+  copy: content={{ item.stdout }} dest={{ kube_token_dir }}/{{ item.item[0] }}-{{ item.item[1] }}.token
+  when: item.stdout|length == 32
+  with_items: master_tokens.results
+
+- name: inserting token to known_tokens file
+  lineinfile: 
+    dest: "{{ kube_token_file }}"
+    line: "{{ item.stdout }},{{ item.item[0] }}-{{ item.item[1] }},{{ item.item[0] }}-{{ item.item[1] }}"
+    regexp: "{{ item.stdout }},{{ item.item[0] }}-{{ item.item[1] }},{{ item.item[0] }}-{{ item.item[1] }}"
+  when: item.stdout|length == 32
+  with_items: master_tokens.results
+  notify:
+    - kube-apiserver_restart
+
+
+- name: generating tokens for node components
+  shell: >
+    grep {{ item[0] }}-{{ item[1] }} {{ kube_token_file }} ||
+    {{ kube_script_dir }}/generate_token.sh
+  register: node_tokens
+  with_nested:
+    - [ 'system:kubelet', 'system:proxy' ]
+    - "{{ groups['nodes'] }}"
+
+- name: creating token file for master component
+  copy: content={{ item.stdout }} dest={{ kube_token_dir }}/{{ item.item[0] }}-{{ item.item[1] }}.token
+  when: item.stdout|length == 32
+  with_items: node_tokens.results
+
+- name: inserting token to known_tokens file
+  lineinfile: 
+    dest: "{{ kube_token_file }}"
+    line: "{{ item.stdout }},{{ item.item[0] }}-{{ item.item[1] }},{{ item.item[0] }}-{{ item.item[1] }}"
+    regexp: "{{ item.stdout }},{{ item.item[0] }}-{{ item.item[1] }},{{ item.item[0] }}-{{ item.item[1] }}"
+  when: item.stdout|length == 32
+  with_items: node_tokens.results
+  notify:
+    - kube-apiserver_restart
+
+# vi:syntax=yaml

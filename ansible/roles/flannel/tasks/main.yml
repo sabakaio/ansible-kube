@@ -1,0 +1,7 @@
+---
+
+- include: flannel_config.yml
+- include: flannel_install.yml
+
+# vi:syntax=yaml
+

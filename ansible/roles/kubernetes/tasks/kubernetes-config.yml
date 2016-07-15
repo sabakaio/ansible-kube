@@ -1,0 +1,69 @@
+---
+
+- name: installing upstart config files
+  template: src=etc/init/{{ item }}.conf.j2 dest=/etc/init/{{ item }}.conf
+  with_items:
+    - kube-apiserver
+    - kube-controller-manager
+    - kube-scheduler
+
+- name: installing service default configuration
+  template: src=etc/default/{{ item }}.j2 dest=/etc/default/{{ item }}
+  register: service_defaults
+  with_items:
+    - kube-apiserver
+    - kube-controller-manager
+    - kube-scheduler
+
+
+- name: getting the master token values
+  slurp:
+    src: "{{ kube_token_dir }}/{{ item }}-{{ inventory_hostname }}.token"
+  with_items:
+    - "system:controller_manager"
+    - "system:scheduler"
+    - "system:kubectl"
+  register: tokens
+  run_once: true
+  delegate_to: "{{ groups['masters'][0] }}"
+
+- name: setting token facts
+  set_fact:
+    controller_manager_token: "{{ tokens.results[0].content|b64decode }}"
+    scheduler_token: "{{ tokens.results[1].content|b64decode }}"
+    kubectl_token: "{{ tokens.results[2].content|b64decode }}"
+
+
+- name: writing the config file for the apiserver service
+  template: src=etc/kubernetes/apiserver.j2 dest={{ kube_config_dir }}/apiserver
+  notify: kube-apiserver_restart
+
+- name: writing the config file for the controller-manager service
+  template: src=etc/kubernetes/controller-manager.j2 dest={{ kube_config_dir }}/controller-manager
+  notify: kube-controller-manager_restart
+
+- name: writing the kubecfg (auth) file for controller-manager service
+  template: src=etc/kubernetes/controller-manager.kubeconfig.j2 dest={{ kube_config_dir }}/controller-manager.kubeconfig
+  notify: kube-controller-manager_restart
+
+
+- name: writing the config file for the scheduler service
+  template: src=etc/kubernetes/scheduler.j2 dest={{ kube_config_dir }}/scheduler
+  notify: kube-scheduler_restart
+
+- name: writing the kubecfg (auth) file for scheduler service
+  template: src=etc/kubernetes/scheduler.kubeconfig.j2 dest={{ kube_config_dir }}/scheduler.kubeconfig
+  notify: kube-scheduler_restart
+
+
+- name: writing the kubecfg (auth) file for kubectl
+  template: src=etc/kubernetes/kubectl.kubeconfig.j2 dest={{ kube_config_dir }}/kubectl.kubeconfig
+
+
+- name: restarting services
+  service: name={{ item.item }} state=restarted
+  when: item.changed
+  with_items: service_defaults.results
+
+
+# vi:syntax=yaml

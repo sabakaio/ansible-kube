@@ -1,0 +1,10 @@
+---
+
+- name: enabling kubernetes services
+  service: name={{ item }} enabled=yes state=started
+  with_items:
+    - kube-apiserver
+    - kube-controller-manager
+    - kube-scheduler
+
+# vi:syntax=yaml

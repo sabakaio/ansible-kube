@@ -1,0 +1,16 @@
+---
+
+- name: downloading Kubernetes binaries
+  get_url:
+    url: "{{ kube_download_url_base }}/{{ item }}"
+    dest: "{{ kube_bin_dir }}/{{ item }}"
+    mode: 0755
+  with_items:
+    - "{{ kube_binaries }}"
+
+- name: creating symlinks
+  file: src={{ kube_bin_dir }}/{{ item }} dest={{ bin_directory }}/{{ item }} state=link
+  with_items:
+    - "{{ kube_binaries }}"
+
+# vi:syntax=yaml

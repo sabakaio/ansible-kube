@@ -1,0 +1,5 @@
+---
+
+kernel_required: 3.19
+
+# vi:syntax=yaml

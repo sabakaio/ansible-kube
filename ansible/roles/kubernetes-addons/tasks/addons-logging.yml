@@ -1,0 +1,13 @@
+---
+- name: LOGGING | checking {{ kube_addons_dir }}/logging directory existance
+  file: path={{ kube_addons_dir }}/logging state=directory
+
+- name: LOGGING | installing logging manifests
+  template: src=etc/kubernetes/logging/{{ item }}.j2 dest={{ kube_addons_dir }}/logging/{{ item }} 
+  with_items:
+    - es-controller.yaml
+    - es-service.yaml
+    - kibana-controller.yaml
+    - kibana-service.yaml
+
+# vi:syntax=yaml

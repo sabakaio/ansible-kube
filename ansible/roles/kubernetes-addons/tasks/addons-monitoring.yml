@@ -1,0 +1,16 @@
+---
+
+- name: MONITORING | checking {{ kube_config_dir }}/addons/cluster-monitoring directory existance
+  file: path={{ kube_addons_dir }}/monitoring state=directory
+
+- name: MONITORING | installing monitoring templates
+  template: src=etc/kubernetes/monitoring/{{ item }}.j2 dest={{ kube_addons_dir }}/monitoring/{{ item }}
+  with_items:
+    - grafana-service.yaml
+    - heapster-controller.yaml
+    - heapster-service.yaml
+    - influxdb-grafana-controller.yaml
+    - influxdb-service.yaml
+
+
+# vi:syntax=yaml

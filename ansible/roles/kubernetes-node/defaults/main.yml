@@ -1,0 +1,6 @@
+---
+
+kubelet_working_dir: /var/lib/kubelet
+
+
+# vi:syntax=yaml

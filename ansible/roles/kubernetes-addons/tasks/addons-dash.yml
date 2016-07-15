@@ -1,0 +1,13 @@
+---
+
+- name: KUBE-DASH | checking {{ kube_addons_dir }}/kube-dash directory existance
+  file: path={{ kube_addons_dir }}/kube-dash state=directory
+
+- name: KUBE-DASH | installing kube-dash manifests
+  template: src=etc/kubernetes/kube-dash/{{ item }}.j2 dest={{ kube_addons_dir }}/kube-dash/{{ item }}
+  with_items:
+    - kube-dash-rc.yaml
+    - kube-dash-svc.yaml
+
+
+# vi:syntax=yaml

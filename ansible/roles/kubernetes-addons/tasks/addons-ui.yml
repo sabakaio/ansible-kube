@@ -1,0 +1,11 @@
+---
+- name: KUBE-UI | checking {{ kube_addons_dir }}/kube-ui directory existance
+  file: path={{ kube_addons_dir }}/kube-ui state=directory
+
+- name: KUBE-UI | installing kube-ui manifests
+  template: src=etc/kubernetes/kube-ui/{{ item }}.j2 dest={{ kube_addons_dir }}/kube-ui/{{ item }}
+  with_items:
+    - ui-rc.yaml
+    - ui-svc.yaml
+
+# vi:syntax=yaml
