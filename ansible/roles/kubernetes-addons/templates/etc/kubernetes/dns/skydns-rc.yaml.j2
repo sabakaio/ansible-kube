@@ -83,6 +83,10 @@ spec:
         # command = "/kube2sky"
         - --domain={{ dns_domain }}
         - --kube-master-url={{ kube_master_api_scheme }}://{{ groups['masters'][0] }}:{{ kube_master_api_port }}
+        volumeMounts:
+        - name: etc-ssl-certs
+          mountPath: /etc/ssl/certs
+          readOnly: true
       - name: skydns
         image: gcr.io/google_containers/skydns:2015-10-13-8c72f8c
         resources:
@@ -128,6 +132,9 @@ spec:
       volumes:
       - name: etcd-storage
         emptyDir: {}
+      - name: etc-ssl-certs
+        hostPath:
+          path: /etc/ssl/certs
       dnsPolicy: Default  # Don't use cluster DNS.
 
 # vi:syntax=yaml
