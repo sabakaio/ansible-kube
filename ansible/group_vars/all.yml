@@ -1,5 +1,8 @@
 ---
 
+# Version of Kubernetes binaries
+kube_version: 1.3.2
+
 ansible_ssh_user: ubuntu
 temporary_directory: /var/tmp/kubernetes
 destination_directory: /opt

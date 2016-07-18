@@ -1,8 +1,5 @@
 ---
 
-# Version of Kubernetes binaries
-kube_version: 1.3.0
-
 # The URL to download Kubernetes binaries from.
 kube_download_url_base: https://storage.googleapis.com/kubernetes-release/release/v{{ kube_version }}/bin/linux/amd64
 
