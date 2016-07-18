@@ -8,6 +8,7 @@ temporary_directory: /var/tmp/kubernetes
 destination_directory: /opt
 networking: flannel
 
+update_kernel: true
 reboot_on_kernel_update: true
 
 # Editting this value will almost surely break something. Don't

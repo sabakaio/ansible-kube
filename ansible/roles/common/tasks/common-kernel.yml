@@ -5,6 +5,9 @@
     kernel_not_valid: "{{ ansible_kernel|version_compare(kernel_required, '<=') }}"
 
 - include: kernel/main.yml
-  when: kernel_not_valid
+  when: kernel_not_valid and update_kernel
+
+- fail: msg="Your kernel is not up to date, you may have problems with networking"
+  when: kernel_not_valid and not update_kernel
 
 # vi:syntax=yaml
