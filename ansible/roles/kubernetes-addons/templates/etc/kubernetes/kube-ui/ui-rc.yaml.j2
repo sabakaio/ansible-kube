@@ -34,8 +34,6 @@ spec:
             memory: 50Mi
         ports:
         - containerPort: 9090
-        args:
-        - --apiserver-host={{ kube_master_api_scheme }}://{{ groups['masters'][0] }}:{{ kube_master_api_port }}
         volumeMounts:
           -
             name: "ssl-certs"

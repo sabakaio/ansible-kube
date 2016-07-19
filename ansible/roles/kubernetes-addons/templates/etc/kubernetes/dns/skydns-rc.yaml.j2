@@ -82,7 +82,6 @@ spec:
         args:
         # command = "/kube2sky"
         - --domain={{ dns_domain }}
-        - --kube-master-url={{ kube_master_api_scheme }}://{{ groups['masters'][0] }}:{{ kube_master_api_port }}
         volumeMounts:
         - name: etc-ssl-certs
           mountPath: /etc/ssl/certs

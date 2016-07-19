@@ -55,10 +55,16 @@ keyUsage                    = nonRepudiation, digitalSignature, keyEncipherment
 subjectAltName              = @alt_names
  
 [alt_names]
-DNS.1 = kubernetes.default
 {% set count = 1 %}
-{% for ip in groups['masters'] %}
+{% for name in ssl_hosts %}
+DNS.{{ count }} = {{ name }}
+{% set count = count + 1 %}
+{% endfor %}
+
+{% set count = 1 %}
+{% for ip in ssl_ips %}
 IP.{{ count }} = {{ ip }}
 {% set count = count + 1 %}
 {% endfor %}
 
+# vi:syntax=dosini

@@ -4,6 +4,7 @@ k8s-master.example.com
 
 [etcd:children]
 masters
+nodes
 
 [nodes]
 k8s-nodes.example.com

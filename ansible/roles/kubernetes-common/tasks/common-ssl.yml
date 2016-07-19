@@ -14,6 +14,19 @@
   copy: dest={{ kube_ssl_dir }}/{{ openssl_ca_serial }} content=01
 
 
+- name: generating hosts/ips for ssl
+  set_fact:
+    ssl_hosts:
+      - kubernetes
+      - kubernetes.default
+    _ssl_ips: >
+      {{ kube_service_addresses|ipaddr('net')|ipaddr(1)|ipaddr('address') }}
+      {{ groups['masters']|join(" ") }}
+
+- set_fact:
+    ssl_ips: >
+      {{ _ssl_ips.split() }}
+
 - name: creating ssl template
   template: src=opt/kubernetes/ssl/openssl.cnf.j2 dest={{ kube_ssl_dir }}/openssl.cnf
 
