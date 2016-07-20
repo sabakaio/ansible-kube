@@ -17,7 +17,7 @@
 
 - name: waiting server to come back
   local_action: wait_for host={{ inventory_hostname }} port=22 state=started delay=30 timeout=300
-  when: reboot_servers.changed
+  when: reboot_servers.started|default(false)
   sudo: false
 
 # vi:syntax=yaml
