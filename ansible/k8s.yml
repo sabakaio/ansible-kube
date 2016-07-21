@@ -47,4 +47,10 @@
   roles:
     - kubernetes-addons
 
+- hosts:
+    - masters
+  sudo: yes
+  roles:
+    - kubernetes-kubectl
+
 # vi:syntax=yaml

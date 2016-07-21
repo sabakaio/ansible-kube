@@ -1,0 +1,5 @@
+---
+
+kubectl_kubeconfig_dest: /tmp/kubeconfig.yml
+
+# vi:syntax=yaml

@@ -1,0 +1,25 @@
+---
+
+- name: reading kubectl token into memory
+  slurp: src={{ kube_token_dir }}/system:kubectl-{{ inventory_hostname }}.token
+  register: result
+  run_once: true
+  delegate_to: >
+    {{ groups['masters'][0] }}
+
+- set_fact:
+    token_kubectl: >
+      {{ result.content|b64decode }}
+
+
+- name: generating kubeconfig
+  template: src=kubeconfig.j2 dest={{ kubectl_kubeconfig_dest }}
+  delegate_to: 127.0.0.1
+  sudo: no
+
+- debug: var=item
+  with_items:
+    - "Now you can use {{ kubectl_kubeconfig_dest }} file to connecto to kubernetes cluster"
+    - "kubectl --kubeconfig={{ kubectl_kubeconfig_dest }} get nodes"
+
+# vi:syntax=yaml

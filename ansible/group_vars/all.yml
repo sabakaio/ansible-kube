@@ -25,6 +25,8 @@ kube_bin_dir: "{{ kube_destination }}/bin"
 # The port that the Kubernetes apiserver component listens on.
 kube_master_api_port: 443
 kube_master_api_scheme: https
+kube_master_insecure_port: 8080
+kube_apiserver_bind_address: "0.0.0.0"
 
 # This is where you can drop yaml/json files and the kubelet will run those
 # pods on startup
