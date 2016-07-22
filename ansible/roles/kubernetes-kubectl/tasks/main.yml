@@ -17,19 +17,17 @@
 - set_fact:
     token_kubectl: >
       {{ result.content|b64decode }}
-    kubeconfig_apiserver: >
-      {% if inventory_hostname in groups['masters'] -%}
-        http://127.0.0.1:{{ kube_master_api_insecure_port }}
-      {%- else -%}
-        {{ kube_master_api_scheme }}://{{ groups['masters'][0] }}:{{ kube_master_api_port }}
-      {% endif -%}
-
+    kubeconfig_apiserver:  http://127.0.0.1:{{ kube_master_api_insecure_port }}
 
 - name: generating kubeconfig on masters
   template: src=kubeconfig.j2 dest={{ item }}/.kube/config
   with_items:
     - /root
     - /home/{{ ansible_ssh_user }}
+
+- set_fact:
+    kubeconfig_apiserver: >
+      {{ kube_master_api_scheme }}://{{ groups['masters'][0] }}:{{ kube_master_api_port }}
 
 - name: generating kubeconfig locally
   template: src=kubeconfig.j2 dest={{ kubectl_kubeconfig_dest }}
