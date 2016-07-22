@@ -1,5 +1,12 @@
 ---
 
+- name: checking kubeconfig directory existance
+  file: path={{ item }}/.kube state=directory
+  with_items:
+    - /root
+    - /home/{{ ansible_ssh_user }}
+
+
 - name: reading kubectl token into memory
   slurp: src={{ kube_token_dir }}/system:kubectl-{{ inventory_hostname }}.token
   register: result
@@ -10,16 +17,32 @@
 - set_fact:
     token_kubectl: >
       {{ result.content|b64decode }}
+    kubeconfig_apiserver: >
+      {% if inventory_hostname in groups['masters'] -%}
+        http://127.0.0.1:{{ kube_master_api_insecure_port }}
+      {%- else -%}
+        {{ kube_master_api_scheme }}://{{ groups['masters'][0] }}:{{ kube_master_api_port }}
+      {% endif -%}
 
 
-- name: generating kubeconfig
+- name: generating kubeconfig on masters
+  template: src=kubeconfig.j2 dest={{ item }}/.kube/config
+  with_items:
+    - /root
+    - /home/{{ ansible_ssh_user }}
+
+- name: generating kubeconfig locally
   template: src=kubeconfig.j2 dest={{ kubectl_kubeconfig_dest }}
   delegate_to: 127.0.0.1
+  run_once: true
   sudo: no
+
 
 - debug: var=item
   with_items:
     - "Now you can use {{ kubectl_kubeconfig_dest }} file to connecto to kubernetes cluster"
     - "kubectl --kubeconfig={{ kubectl_kubeconfig_dest }} get nodes"
+  delegate_to: 127.0.0.1
+  run_once: true
 
 # vi:syntax=yaml
