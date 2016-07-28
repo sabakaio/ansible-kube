@@ -14,9 +14,8 @@
   delegate_to: "{{ groups['masters'][0] }}"
 
 - set_fact:
-    token_kubectl: >
-      {{ result.content|b64decode }}
-    kubeconfig_apiserver:  http://127.0.0.1:{{ kube_master_api_insecure_port }}
+    token_kubectl: "{{ result.content|b64decode }}"
+    kubeconfig_apiserver: http://127.0.0.1:{{ kube_master_api_insecure_port }}
 
 - name: generating kubeconfig on masters
   template: src=kubeconfig.j2 dest={{ item }}/.kube/config
@@ -25,8 +24,7 @@
     - /home/{{ ansible_ssh_user }}
 
 - set_fact:
-    kubeconfig_apiserver: >
-      {{ kube_master_api_scheme }}://{{ groups['masters'][0] }}:{{ kube_master_api_port }}
+    kubeconfig_apiserver: "{{ kube_master_api_scheme }}://{{ groups['masters'][0] }}:{{ kube_master_api_port }}"
 
 - name: generating kubeconfig locally
   template: src=kubeconfig.j2 dest={{ kubectl_kubeconfig_dest }}
