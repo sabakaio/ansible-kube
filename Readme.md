@@ -1,5 +1,7 @@
 
 Requirements:
+python
+
 pip:
   ansible == 1.9.4
 
