@@ -11,8 +11,7 @@
   slurp: src={{ kube_token_dir }}/system:kubectl-{{ inventory_hostname }}.token
   register: result
   run_once: true
-  delegate_to: >
-    {{ groups['masters'][0] }}
+  delegate_to: "{{ groups['masters'][0] }}"
 
 - set_fact:
     token_kubectl: >
