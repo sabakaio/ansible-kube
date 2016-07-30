@@ -34,7 +34,7 @@ ansible
       |_ main.yml # role specific configuration variables
 ```
 
-```shell
+```bash
 vim ansible/group_vars/all.yml
 ```
 
