@@ -75,7 +75,7 @@ nodes
 
 ```
 
-## Sections descriptions
+## Sections description
 ```
 [masters]
 ```
