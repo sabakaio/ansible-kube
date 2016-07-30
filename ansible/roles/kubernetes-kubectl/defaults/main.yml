@@ -1,5 +1,5 @@
 ---
 
-kubectl_kubeconfig_dest: kubeconfig.yml
+kubectl_kubeconfig_dest: ./kubeconfig.yml
 
 # vi:syntax=yaml
