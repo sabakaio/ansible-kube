@@ -34,7 +34,7 @@ ansible
       |_ main.yml # role specific configuration variables
 ```
 
-```sh
+```bash
 vim ansible/group_vars/all.yml
 ```
 
@@ -55,7 +55,7 @@ flannel_subnet: 172.16.0.0
 # This network must be unused in your network infrastructure!
 ```
 
-```shell
+```bash
 vim ansible/inventory
 ```
 
@@ -75,6 +75,7 @@ nodes
 
 ```
 
+## Sections descriptions
 ```
 [masters]
 ```
