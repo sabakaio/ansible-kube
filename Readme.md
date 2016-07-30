@@ -49,7 +49,6 @@ kube_service_addresses: 10.254.0.0/16
 # addresses do not need to be routable and must just be an unused block of space.
 
 flannel_subnet: 172.16.0.0
-
 # Flannel internal network (optional). When flannel is used, it will assign IP
 # addresses from this range to individual pods.
 # This network must be unused in your network infrastructure!
