@@ -98,10 +98,17 @@ This network should not be used in your network infrastructure!
 flannel_subnet: 172.16.0.0
 ```
 
-## Creating cluster
+## Create a cluster
 
-Now you ready to create your kubernetes cluster. All you have to do is to run "create_cluster.sh"
+You can create a cluster with a single script
 
-```shell
+```bash
 ./ansible/create_cluster.sh
+```
+
+`ubuntu` user is used to ssh to remote hosts by default, you could change it by passing extra variable for *Ansible*
+
+
+```bash
+./ansible/create_cluster.sh -e ansible_ssh_user=my_user
 ```
