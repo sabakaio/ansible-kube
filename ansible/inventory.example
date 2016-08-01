@@ -1,14 +1,17 @@
-
 [masters]
+# List of Kubernetes master nodes hosts.
 k8s-master.example.com
 
-[etcd:children]
-masters
-nodes
-
 [nodes]
+# Hosts you want to use as Kubernetes nodes.
 k8s-nodes.example.com
 
 [nodes:children]
+# If you want to use the master host as a node host too.
 masters
 
+[etcd:children]
+# Hosts to use for etcd cluster.
+# Add master and nodes hosts for high availablility.
+masters
+nodes
