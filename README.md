@@ -112,3 +112,11 @@ You can create a cluster with a single script
 ```bash
 ./ansible/create_cluster.sh -e ansible_ssh_user=my_user
 ```
+
+## Access the cluster
+
+Cluster installer produces `kubeconfig.yml` in `cwd`. It can be used to access the cluster with `kubectl`.
+
+```bash
+kubectl --kubeconfig=kubeconfig.yml cluster-info
+```
