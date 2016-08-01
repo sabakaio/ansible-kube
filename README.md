@@ -32,82 +32,71 @@ Install *Ansible* on host you will use to run installer (your localhost usually)
 pip install ansible==2.0.0.2 netaddr
 ```
 
-## Configuring Ansible Playbooks
+## Configure Ansible inventory
 
-There is a few options to configure before running this playbooks.
-Directory tree describes files with configuration variables:
+You should prepare *Ansible* inventory (`ansible/inventory` file) to configure hosts before running intaller.
 
-```
-ansible
-|_ group_vars/
-  |_ all.yml # global variables for all roles
-|_ roles/
-  |_ <role_name>
-    |_ defaults/
-      |_ main.yml # role specific configuration variables
-```
+### Inventory
+
+Use our example as a template for your inventory
 
 ```bash
-vim ansible/group_vars/all.yml
-```
-
-```yaml
-ansible_ssh_user: ubuntu
-# Use this SSH user to login on the remote server.
-
-kube_service_addresses: 10.254.0.0/16
-# Kubernetes internal network for services.
-# Kubernetes services will get fake IP addresses from this range.
-# This range must not conflict with anything in your infrastructure. These
-# addresses do not need to be routable and must just be an unused block of space.
-
-flannel_subnet: 172.16.0.0
-# Flannel internal network (optional). When flannel is used, it will assign IP
-# addresses from this range to individual pods.
-# This network must be unused in your network infrastructure!
-```
-
-```bash
+cp ansible/inventory.example ansible/inventory
 vim ansible/inventory
 ```
 
+You configuration should looks like this
+
 ```ini
 [masters]
+# List of Kubernetes master nodes hosts.
 10.63.0.1
 
-[etcd:children]
-masters
-nodes
-
 [nodes]
+# Hosts you want to use as Kubernetes nodes.
 10.63.0.11
 10.63.0.12
 
-[nodes:children]
-
-```
-
-## Sections description
-```
-[masters]
-```
-Write in this section hosts you want to use as masters.
-
-```
-[nodes]
-```
-Hosts that you want to be used as nodes.
-
-```
 [etcd:children]
+# Hosts to use for etcd cluster.
+# Add master and nodes hosts for high availablility.
+masters
+nodes
 ```
-Hosts to be used for etcd cluster. The good point to use master and nodes for this purpose.
 
+### Playbook group_vars customization
 
-## Providing root access on hosts
+In some rare cases you have to edit default *group_vars* at `ansible/group_vars/all.yml`.
+Here is highlights
 
-This playbooks requires that your user have a ssh access with key authorization on remote hosts.
+#### SSH user
 
+User to login on the remote server with SSH.
+
+```yaml
+ansible_ssh_user: ubuntu
+```
+
+#### Kubernetes network
+
+Kubernetes internal network for services.
+Kubernetes services will get fake IP addresses from this range.
+This range should not conflict with anything in your infrastructure.
+These addresses do not need to be routable and should be just an unused block of space.
+
+```yaml
+kube_service_addresses: 10.254.0.0/16
+```
+
+#### Flannel subnet
+
+Flannel internal network.
+Flannel will assign IP addresses from this range to individual pods.
+This network should not be used in your network infrastructure!
+
+```yaml
+flannel_subnet: 172.16.0.0
+```
 
 ## Creating cluster
 
@@ -116,4 +105,3 @@ Now you ready to create your kubernetes cluster. All you have to do is to run "c
 ```shell
 ./ansible/create_cluster.sh
 ```
-
