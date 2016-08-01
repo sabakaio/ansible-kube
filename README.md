@@ -1,23 +1,36 @@
+# Kubernetes Cluster Setup
+
+*Ansible* playbook to setup a *Kubernetes* cluster
 
 ## Requirements
 
-##### Python
+All installation and configuration routines are automated. There some requirements for host machines.
 
-```
+### Linux
+
+Each machine should be with *Linux* installed (latest *Ubuntu LTS* is preferred). Minimal *kernel* version is **3.19**.
+
+### Availability
+
+All servers should be in one subnetwork and all ports should be oped in foll all these hosts.
+Each host should accept incoming traffic for **port 22** to allow *Ansible* connect and make installation.
+And you sould add you *SSH* public key to *~/.ssh/authorized_keys* on each host for user you will use to connect during installation.
+
+### Python
+
+Python should be installed on each cluster host to run *Ansible* scripts
+
+```bash
 apt-get install python python-pip
-# You need a python on each node to run ansible
 ```
 
-##### Ansible and Ansible Dependencies
-```
+### Ansible
+
+Install *Ansible* on host you will use to run installer (your localhost usually). Minimal *Ansible* version is 2.0.0.2, tested up to 2.1.0.0.
+
+```bash
 pip install ansible==2.0.0.2 netaddr
-# Valid ansible versions are: >=2.0.0.2 && <=2.1.0.0
 ```
-
-##### Kernel
-
-kernel >= 3.19
-
 
 ## Configuring Ansible Playbooks
 
