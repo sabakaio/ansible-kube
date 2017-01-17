@@ -27,8 +27,10 @@ spec:
           # keep request = limit to keep this container in guaranteed class
           limits:
             cpu: 100m
+            memory: 300Mi
           requests:
             cpu: 100m
+            memory: 150Mi
         env:
           - name: "ELASTICSEARCH_URL"
             value: "http://elasticsearch-logging:9200"
