@@ -15,7 +15,7 @@
 
 - set_fact:
     token_kubectl: "{{ result.content|b64decode }}"
-    kubeconfig_apiserver: https://{{ groups['masters'][0] }}:{{ kube_master_api_port }}
+    kubeconfig_apiserver: http://127.0.0.1:{{ kube_master_api_insecure_port }}
 
 - name: generating kubeconfig on masters
   template: src=kubeconfig.j2 dest={{ item }}/.kube/config
