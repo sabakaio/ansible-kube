@@ -1,6 +1,11 @@
 # Docker Upstart and SysVinit configuration file
 
-. /run/flannel/subnet.env
+FLUNNEL_ENV=/run/flannel/subnet.env
+while ! [ -f $FLUNNEL_ENV ]; do
+  echo Waiting for $FLUNNEL_ENV
+  sleep 1;
+done
+. $FLUNNEL_ENV
 
 # Customize location of Docker binary (especially for development testing).
 #DOCKER="/usr/local/bin/docker"
