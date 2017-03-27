@@ -35,7 +35,7 @@ default_bits                = 2048
 default_keyfile             = server.key
 distinguished_name          = req_distinguished_name
 req_extensions              = v3_req
- 
+
 [ req_distinguished_name ]
 countryName                 = Country Name (2 letter code)
 countryName_default         = ES
@@ -48,23 +48,19 @@ organizationName_default    = Kubernetes
 commonName                  = Common Name (eg, YOUR name)
 commonName_default          = {{ groups['masters'][0] }}
 commonName_max              = 64
- 
+
 [ v3_req ]
 basicConstraints            = CA:FALSE
 keyUsage                    = nonRepudiation, digitalSignature, keyEncipherment
 subjectAltName              = @alt_names
- 
+
 [alt_names]
-{% set count = 1 %}
 {% for name in ssl_hosts %}
-DNS.{{ count }} = {{ name }}
-{% set count = count + 1 %}
+DNS.{{ loop.index }} = {{ name }}
 {% endfor %}
 
-{% set count = 1 %}
 {% for ip in ssl_ips %}
-IP.{{ count }} = {{ ip }}
-{% set count = count + 1 %}
+IP.{{ loop.index }} = {{ ip }}
 {% endfor %}
 
 # vi:syntax=dosini
